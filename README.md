@@ -1,5 +1,7 @@
 # Rogue Trooper - Enhanced PC Patch
 
+![Rogue Trooper Enhanced PC Patch](media/Image%20Codex%2023%20sept.%202026%2C%2015_39_41.png)
+
 A cumulative compatibility and presentation patch for the original PC release of **Rogue Trooper**.
 
 **Current stable build: V64**
