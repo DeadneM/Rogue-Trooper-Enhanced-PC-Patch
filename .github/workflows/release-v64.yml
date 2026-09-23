@@ -1,0 +1,68 @@
+name: Publish V64 release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-v64.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: false
+
+      - name: Build Windows x64 patcher
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: '0'
+        run: go build -trimpath -buildvcs=false -ldflags="-s -w" -o RogueTrooper_Patcher_V64.exe ./patcher
+
+      - name: Create release package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/Rogue_Trooper_Enhanced_PC_Patch_V64
+          cp RogueTrooper_Patcher_V64.exe dist/Rogue_Trooper_Enhanced_PC_Patch_V64/
+          cp README.md PATCH_HISTORY.md SECURITY.md dist/Rogue_Trooper_Enhanced_PC_Patch_V64/
+          (
+            cd dist
+            zip -9 -r Rogue_Trooper_Enhanced_PC_Patch_V64.zip Rogue_Trooper_Enhanced_PC_Patch_V64
+            sha256sum Rogue_Trooper_Enhanced_PC_Patch_V64.zip > Rogue_Trooper_V64_SHA256SUMS.txt
+            sha256sum ../RogueTrooper_Patcher_V64.exe >> Rogue_Trooper_V64_SHA256SUMS.txt
+          )
+
+      - name: Upload Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rogue_Trooper_Enhanced_PC_Patch_V64
+          path: |
+            dist/Rogue_Trooper_Enhanced_PC_Patch_V64.zip
+            RogueTrooper_Patcher_V64.exe
+            dist/Rogue_Trooper_V64_SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v64 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v64               RogueTrooper_Patcher_V64.exe               dist/Rogue_Trooper_Enhanced_PC_Patch_V64.zip               dist/Rogue_Trooper_V64_SHA256SUMS.txt               --clobber               --repo "$GITHUB_REPOSITORY"
+            gh release edit v64               --title "Rogue Trooper Enhanced PC Patch V64"               --notes-file RELEASE_NOTES.md               --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create v64               RogueTrooper_Patcher_V64.exe               dist/Rogue_Trooper_Enhanced_PC_Patch_V64.zip               dist/Rogue_Trooper_V64_SHA256SUMS.txt               --target "$GITHUB_SHA"               --title "Rogue Trooper Enhanced PC Patch V64"               --notes-file RELEASE_NOTES.md               --repo "$GITHUB_REPOSITORY"
+          fi
