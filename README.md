@@ -4,6 +4,17 @@ A cumulative compatibility and presentation patch for the original PC release of
 
 **Current stable build: V64**
 
+## Main features
+
+- 4K and ultrawide support.
+- Dynamic Hor+ field of view.
+- Conditional borderless window behavior with native fallback.
+- HUD and UI corrections across modern aspect ratios.
+- Alt-Tab and native Alt+F4 fixes.
+- Reticle and sniper scope corrections.
+- Improved font and menu scaling.
+- Corrected floating HUD markers and encyclopedia image layout.
+
 The patcher is intentionally conservative: it only accepts the exact supported retail executable, creates a verified backup, reconstructs the validated V64 executable, verifies its SHA-256 before installation, and aborts without installing an unverified output if anything differs.
 
 ## What V64 fixes
